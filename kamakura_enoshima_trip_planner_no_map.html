@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1324" />
+  <title>Kamakura × Enoshima — Day Plan</title>
+
+  <style>
+    :root{
+      --bg:#08111f; --panel:#0e1a2d; --panel2:#111f35; --line:#223554;
+      --text:#f7f9fc; --muted:#9fb0ca; --accent:#62d6ff; --accent2:#d7a6ff;
+      --good:#65dfad; --warn:#ffc766; --danger:#ff8088; --rail:#58a6ff;
+      --enoden:#82d173; --walk:#ffb86b; --shadow:0 20px 60px rgba(0,0,0,.28);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI","Noto Sans Thai","Noto Sans JP",sans-serif;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(98,214,255,.10), transparent 30%),
+        radial-gradient(circle at 90% 5%, rgba(215,166,255,.08), transparent 28%),
+        var(--bg);
+      color:var(--text);
+    }
+    button,input,a{font:inherit}
+    button{cursor:pointer}
+    a{color:inherit}
+    .shell{max-width:1440px;margin:0 auto;padding:26px 22px 70px}
+    .hero{
+      display:grid; grid-template-columns:minmax(0,1fr) auto; gap:20px; align-items:end;
+      margin-bottom:20px;
+    }
+    .eyebrow{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:800}
+    h1{font-size:clamp(2rem,5vw,4.6rem);line-height:.98;margin:.35rem 0 .8rem;letter-spacing:-.055em}
+    .hero p{margin:0;color:var(--muted);max-width:820px;line-height:1.75}
+    .datebox{
+      border:1px solid var(--line);background:rgba(14,26,45,.75);backdrop-filter:blur(12px);
+      padding:14px 16px;border-radius:18px;min-width:210px;box-shadow:var(--shadow)
+    }
+    .datebox b{display:block;font-size:1.1rem}.datebox span{color:var(--muted);font-size:.9rem}
+    .topgrid{display:grid;grid-template-columns:1fr;gap:18px}
+    .mapcard,.sidecard,.timeline-card,.info-card{
+      border:1px solid var(--line);background:rgba(14,26,45,.92);border-radius:22px;overflow:hidden;box-shadow:var(--shadow)
+    }
+    .cardhead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 16px;border-bottom:1px solid var(--line)}
+    .cardhead h2,.cardhead h3{font-size:1rem;margin:0}
+    .sub{color:var(--muted);font-size:.83rem}
+            .sidecard{padding:16px;align-self:start}
+    .mode-title{font-size:1rem;font-weight:800;margin:0 0 4px}
+    .mode-desc{color:var(--muted);font-size:.86rem;line-height:1.55;margin:0 0 14px}
+    .delay-wrap{background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:14px}
+    .delay-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .delay-value{font-size:1.35rem;font-weight:900;color:var(--accent)}
+    input[type=range]{width:100%;accent-color:#62d6ff;margin:15px 0 7px}
+    .ticks{display:flex;justify-content:space-between;color:var(--muted);font-size:.7rem}
+    .status{
+      margin-top:12px;border-radius:16px;padding:12px 13px;border:1px solid var(--line);
+      background:rgba(255,255,255,.025)
+    }
+    .status strong{display:block;margin-bottom:4px}
+    .status.good strong{color:var(--good)} .status.warn strong{color:var(--warn)} .status.danger strong{color:var(--danger)}
+    .status p{margin:0;color:var(--muted);line-height:1.55;font-size:.82rem}
+    .checkpoint{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:12px}
+    .checkpoint div{padding:10px 11px;border:1px solid var(--line);border-radius:14px;background:var(--panel2)}
+    .checkpoint b{font-size:.88rem}.checkpoint span{display:block;color:var(--muted);font-size:.73rem;margin-top:3px}
+    .rescue{margin-top:14px}
+    .rescue h3{font-size:.86rem;margin:0 0 8px}
+    .rescue-list{display:grid;gap:7px}
+    .rescue-item{
+      display:grid;grid-template-columns:28px 1fr auto;gap:9px;align-items:start;padding:9px 10px;
+      border:1px solid var(--line);border-radius:13px;color:var(--muted);font-size:.79rem
+    }
+    .rescue-item.active{border-color:rgba(255,199,102,.58);background:rgba(255,199,102,.06);color:var(--text)}
+    .num{
+      width:25px;height:25px;border-radius:8px;background:#172842;display:grid;place-items:center;font-weight:900;color:var(--text)
+    }
+    .saved{color:var(--warn);white-space:nowrap;font-weight:800}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+    .btn{
+      border:1px solid var(--line);background:#152640;color:var(--text);padding:10px 12px;border-radius:12px;
+      font-weight:800;font-size:.8rem
+    }
+    .btn:hover{border-color:#3d5d8c}
+    .btn.primary{background:var(--accent);color:#052133;border-color:transparent}
+    .section-title{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:34px 0 14px}
+    .section-title h2{font-size:1.5rem;margin:0}.section-title p{margin:0;color:var(--muted);font-size:.85rem}
+    .timeline{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(330px,.65fr);gap:18px}
+    .timeline-card{padding:4px 0}
+    .stop{
+      display:grid;grid-template-columns:92px 38px minmax(0,1fr);gap:12px;padding:15px 16px;
+      border-bottom:1px solid rgba(34,53,84,.72);transition:.2s;background:transparent
+    }
+    .stop:last-child{border-bottom:0}
+    .stop:hover,.stop.selected{background:rgba(98,214,255,.055)}
+    .time{font-variant-numeric:tabular-nums;font-weight:900;font-size:.9rem;padding-top:4px}
+    .time small{display:block;color:var(--muted);font-weight:500;margin-top:3px;font-size:.72rem}
+    .stepdot{
+      width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:.8rem;font-weight:900;
+      background:#162942;border:2px solid #365475;position:relative
+    }
+    .stepdot:after{content:"";position:absolute;width:2px;background:#29415f;top:35px;bottom:-30px;left:14px}
+    .stop:last-child .stepdot:after{display:none}
+    .stop.done .stepdot{background:var(--good);border-color:var(--good);color:#062319}
+    .stop-main{min-width:0}
+    .stop-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .stop h3{font-size:1rem;margin:0;line-height:1.35}
+    .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+    .tag{font-size:.67rem;padding:4px 7px;border-radius:999px;background:#172a46;color:#c8d5e8;border:1px solid #284263}
+    .tag.protect{color:#071d28;background:var(--accent);border-color:transparent;font-weight:900}
+    .tag.cut{color:#3a2700;background:var(--warn);border-color:transparent;font-weight:900}
+    .desc{color:var(--muted);font-size:.82rem;line-height:1.65;margin:8px 0 0}
+    .action-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+    .mini{
+      border:1px solid var(--line);background:#12223a;color:var(--text);border-radius:10px;padding:7px 9px;
+      font-size:.72rem;text-decoration:none
+    }
+    .mini:hover{border-color:var(--accent)}
+    .done-btn{
+      border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:10px;padding:7px 9px;font-size:.72rem
+    }
+    .done .done-btn{border-color:rgba(101,223,173,.45);color:var(--good)}
+    .journey-panel{padding:16px}
+    .journey-panel h3{margin:0 0 12px;font-size:1rem}
+    .segment{
+      padding:12px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:42px 1fr;gap:10px
+    }
+    .segment:last-child{border-bottom:0}
+    .segicon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#172a46}
+    .segment b{font-size:.83rem}.segment p{margin:4px 0 0;color:var(--muted);font-size:.75rem;line-height:1.5}
+    .segmeta{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px}
+    .segmeta span{font-size:.66rem;padding:3px 6px;border-radius:7px;background:#172a46;color:#cbd7e9}
+    .notesgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
+    .info-card{padding:16px}
+    .info-card h3{margin:0 0 8px;font-size:.96rem}.info-card p,.info-card li{color:var(--muted);font-size:.8rem;line-height:1.6}
+    .info-card ul{padding-left:18px;margin:0}
+    .info-card .big{font-size:1.25rem;color:var(--text);font-weight:900}
+    .foot{margin-top:22px;color:#8296b3;font-size:.73rem;line-height:1.6}
+    .banner{
+      margin-top:18px;border:1px solid rgba(98,214,255,.28);border-radius:18px;padding:13px 15px;
+      background:linear-gradient(90deg,rgba(98,214,255,.07),rgba(215,166,255,.05));
+      display:flex;gap:12px;align-items:center;color:var(--muted);font-size:.8rem;line-height:1.55
+    }
+    .banner b{color:var(--text)}
+    @media (max-width:1050px){
+      .timeline{grid-template-columns:1fr}
+      .notesgrid{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width:680px){
+      .shell{padding:18px 12px 50px}
+      .hero{grid-template-columns:1fr}.datebox{min-width:0}
+      h1{font-size:2.6rem}
+      .notesgrid{grid-template-columns:1fr}
+      .stop{grid-template-columns:72px 30px minmax(0,1fr);gap:8px;padding:14px 11px}
+      .stepdot{width:28px;height:28px;font-size:.7rem}
+      .stepdot:after{left:11px;top:29px}
+      .time{font-size:.78rem}
+      .stop-top{display:block}
+      .action-row{gap:5px}
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <section class="hero">
+    <div>
+      <div class="eyebrow">Kamakura × Enoshima / Day Route</div>
+      <h1>เที่ยวตามลำดับ<br>และไม่พลาด Sunset</h1>
+      <p>Timeline + วิธีเดินทาง + “Delay Rescue” สำหรับวันที่ออกช้า โดยระบบจะตัดเวลาจุดที่สำคัญน้อยกว่าก่อน และพยายามล็อกช่วง Enoshima / Sunset / 江の島灯籠 ไว้เหมือนเดิม</p>
+    </div>
+    <div class="datebox">
+      <b>ศุกร์ 4 ก.ย. 2026</b>
+      <span>Yokohama → Kamakura → Enoshima → Yokohama</span>
+    </div>
+  </section>
+
+  <section class="topgrid">
+    <aside class="sidecard">
+      <div class="mode-title">⏱ Delay Rescue</div>
+      <p class="mode-desc">เลื่อนตามเวลาที่คุณออกช้ากว่า 08:15 ระบบจะบีบกิจกรรมตามลำดับก่อนแตะช่วง Enoshima</p>
+
+      <div class="delay-wrap">
+        <div class="delay-row">
+          <b>ช้ากว่าแผน</b>
+          <div class="delay-value"><span id="delayValue">0</span> นาที</div>
+        </div>
+        <input id="delaySlider" type="range" min="0" max="180" step="5" value="0" aria-label="จำนวนเวลาที่ช้ากว่าแผน">
+        <div class="ticks"><span>ตรงเวลา</span><span>+60</span><span>+120</span><span>+180</span></div>
+      </div>
+
+      <div class="status good" id="statusBox" aria-live="polite">
+        <strong id="statusTitle">แผนเต็ม — ไม่ต้องตัดอะไร</strong>
+        <p id="statusText">เป้าหมายคือขึ้นถึง Samuel Cocking Garden ประมาณ 16:30 และเริ่มหาจุดดูพระอาทิตย์ตก 17:15</p>
+      </div>
+
+      <div class="checkpoint">
+        <div><b>17:15</b><span>ล็อกจุด Sunset</span></div>
+        <div><b>18:00</b><span>ไฟโคมเริ่มเปิด</span></div>
+        <div><b>20:00</b><span>Last entry วันธรรมดา</span></div>
+        <div><b>20:30</b><span>งานไฟสิ้นสุด</span></div>
+      </div>
+
+      <div class="rescue">
+        <h3>ลำดับที่ระบบจะลดเวลา</h3>
+        <div class="rescue-list" id="rescueList"></div>
+      </div>
+
+      <div class="controls">
+        <button class="btn primary" id="preset30">+30 นาที</button>
+        <button class="btn" id="preset60">+60</button>
+        <button class="btn" id="preset90">+90</button>
+        <button class="btn" id="resetBtn">Reset</button>
+      </div>
+    </aside>
+  </section>
+
+  <div class="banner">
+    <div style="font-size:1.3rem">🏮</div>
+    <div><b>江の島灯籠 2026:</b> 1 ส.ค.–23 ก.ย. 2026, เปิดไฟ 18:00–20:30 ในวันธรรมดา (ฝนหนัก/อากาศไม่ดีอาจยกเลิก) — ดังนั้นระบบนี้จะรักษาช่วงเย็นของ Enoshima เป็นอันดับแรก</div>
+  </div>
+
+  <div class="section-title">
+    <div><h2>Timeline ที่ปรับตามเวลาจริง</h2><p>กด ✓ เพื่อเช็กว่าทำแล้ว • ใช้ Directions เพื่อเปิด Google Maps เฉพาะตอนที่ต้องเดินทาง</p></div>
+    <p id="planSummary">Full plan · ETA sunset zone 17:15</p>
+  </div>
+
+  <section class="timeline">
+    <div class="timeline-card" id="timelineList"></div>
+
+    <aside class="journey-panel mapcard">
+      <h3>🚆 วิธีเดินทางต่อทีละช่วง</h3>
+      <div id="segmentsList"></div>
+    </aside>
+  </section>
+
+  <section class="notesgrid">
+    <div class="info-card">
+      <h3>🎫 Enoden pass</h3>
+      <div class="big">Noriorikun ¥800</div>
+      <p>ใช้ Enoden ได้ไม่จำกัดเที่ยวในวันเดียว เหมาะกับ route นี้เพราะขึ้น/ลงหลายสถานี และมีสิทธิพิเศษกับบางสถานที่ เช่น Hasedera และ Sea Candle</p>
+    </div>
+    <div class="info-card">
+      <h3>✂️ จุดที่ตัดได้ก่อน</h3>
+      <ul>
+        <li>Inamuragasaki เป็น buffer แรก</li>
+        <li>Slam Dunk crossing ลดเหลือ 15–20 นาทีได้</li>
+        <li>Komachi / Lunch ลดเวลาได้ก่อน Hasedera</li>
+        <li>ถ้าช้ามาก ระบบค่อยบีบ Tsurugaoka และ Great Buddha</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h3>🔒 จุดที่ควรรักษา</h3>
+      <ul>
+        <li>Hasedera อย่างน้อย ~35–40 นาที</li>
+        <li>ขึ้นยอด Enoshima ก่อนช่วง golden hour</li>
+        <li>Sunset 17:15–18:10</li>
+        <li>Lantern route หลัง 18:00</li>
+      </ul>
+    </div>
+  </section>
+
+  <p class="foot">
+    ข้อมูลเวลางาน: 江の島灯籠 2026 official • Noriorikun: Enoshima Electric Railway official • Hasedera: official site.
+    เวลารถไฟ/การเดินใน timeline เป็นเวลาวางแผนโดยประมาณ ไม่ใช่ตารางรถไฟสด ควรเช็ก Google Maps / Japan transit ในเช้าวันเดินทางจริง
+  </p>
+</div>
+
+<script>
+(() => {
+  const root = document;
+  const locations = {
+    yokohama:{name:"Yokohama Station",lat:35.46569,lng:139.62250,group:"transit"},
+    kamakura:{name:"Kamakura Station",lat:35.31907,lng:139.55044,group:"transit"},
+    komachi:{name:"Komachi-dori",lat:35.32150,lng:139.55070,group:"kamakura"},
+    hachimangu:{name:"Tsurugaoka Hachimangu",lat:35.32517,lng:139.55594,group:"kamakura"},
+    hasedera:{name:"Hasedera",lat:35.31246,lng:139.53300,group:"kamakura"},
+    kotoku:{name:"Kotoku-in / Great Buddha",lat:35.31687,lng:139.53582,group:"kamakura"},
+    inamura:{name:"Inamuragasaki",lat:35.30370,lng:139.52220,group:"coast"},
+    slam:{name:"Kamakurakokomae Crossing",lat:35.30661,lng:139.50208,group:"coast"},
+    enostation:{name:"Enoshima Station",lat:35.31106,lng:139.48756,group:"transit"},
+    nakamise:{name:"Benzaiten Nakamise-dori",lat:35.30218,lng:139.48114,group:"enoshima"},
+    shrine:{name:"Enoshima Shrine / Zuishinmon",lat:35.30036,lng:139.47960,group:"enoshima"},
+    garden:{name:"Samuel Cocking Garden",lat:35.29975,lng:139.47927,group:"enoshima"},
+    candle:{name:"Enoshima Sea Candle",lat:35.29976,lng:139.47848,group:"enoshima"},
+    fujisawa:{name:"Fujisawa Station",lat:35.33882,lng:139.48722,group:"transit"}
+  };
+
+  const blocks = [
+    {id:"jr", loc:"yokohama", title:"Yokohama → Kamakura", icon:"🚆", dur:35, kind:"JR", desc:"ขึ้น JR Yokosuka Line ไป Kamakura โดยตรง ถ้ามีขบวนที่ไป Zushi / Yokosuka / Kurihama", tags:["JR","เริ่มวัน"], mapText:"ขึ้น JR Yokosuka Line → Kamakura"},
+    {id:"komachi", loc:"komachi", title:"Komachi-dori", icon:"🍡", dur:40, kind:"activity", desc:"เดินช้อปเบา ๆ + snack 1 อย่าง ไม่ควรใช้เวลาเข้าคิวยาวในช่วงเช้า", tags:["เดิน","ของกิน"]},
+    {id:"hachimangu", loc:"hachimangu", title:"Tsurugaoka Hachimangu", icon:"⛩️", dur:50, kind:"activity", desc:"ไหว้ศาลเจ้าหลัก ถ่ายรูป แล้วเดินกลับ Kamakura Station ฝั่ง Enoden", tags:["ศาลเจ้า","Kamakura"]},
+    {id:"pass", loc:"kamakura", title:"ซื้อ Noriorikun + Enoden → Hase", icon:"🎫", dur:20, kind:"Enoden", desc:"ซื้อ Enoden One-Day Pass ¥800 แล้วขึ้นรถฝั่ง Fujisawa ลง Hase", tags:["Enoden","Pass ¥800"]},
+    {id:"hasedera", loc:"hasedera", title:"Hasedera", icon:"🌿", dur:50, kind:"activity", desc:"สวน วัด และ viewpoint ทะเล จุดนี้คุ้มเวลาและควรรักษาไว้อย่างน้อย ~35–40 นาที", tags:["วัด","วิวทะเล"], protect:true},
+    {id:"walk-kotoku", loc:"kotoku", title:"เดิน Hasedera → Kotoku-in", icon:"🚶", dur:10, kind:"walk", desc:"เดินประมาณ 10 นาทีไป Great Buddha", tags:["เดิน"]},
+    {id:"kotoku", loc:"kotoku", title:"Great Buddha / Kotoku-in", icon:"🗿", dur:35, kind:"activity", desc:"ถ่ายรูป เดินรอบองค์พระ และเข้าด้านในถ้าเปิดให้เข้าชม", tags:["วัด","Great Buddha"]},
+    {id:"lunch", loc:"kotoku", title:"Lunch @ Hase", icon:"🍜", dur:40, kind:"activity", desc:"กินมื้อจริงแถว Hase; ถ้าคิวยาวเกิน ~15 นาทีให้เปลี่ยนร้าน", tags:["อาหาร","Buffer"]},
+    {id:"to-inamura", loc:"inamura", title:"Hase → Inamuragasaki", icon:"🚃", dur:15, kind:"Enoden", desc:"ขึ้น Enoden ฝั่ง Fujisawa แล้วเดินจากสถานีไปชายฝั่ง", tags:["Enoden"]},
+    {id:"inamura", loc:"inamura", title:"Inamuragasaki", icon:"🌊", dur:30, kind:"activity", desc:"ดูชายฝั่งและถ่ายรูป จุดนี้เป็น Buffer #1 — ช้าเมื่อไรให้ลด/ตัดตรงนี้ก่อน", tags:["ชายฝั่ง","ตัดก่อน"]},
+    {id:"to-slam", loc:"slam", title:"Inamuragasaki → Kamakurakokomae", icon:"🚃", dur:15, kind:"Enoden", desc:"นั่ง Enoden ต่อไป Kamakurakokomae", tags:["Enoden"]},
+    {id:"slam", loc:"slam", title:"Slam Dunk Crossing", icon:"🏀", dur:30, kind:"activity", desc:"รอรถไฟผ่าน 2–3 รอบก็พอ อยู่บนทางเท้าและไม่กีดขวางทางรถ/คน", tags:["Photo spot","Buffer"]},
+    {id:"to-enoshima", loc:"enostation", title:"Kamakurakokomae → Enoshima", icon:"🚃", dur:20, kind:"Enoden", desc:"ลง Enoshima Station แล้วเตรียมเดินเข้าเกาะ", tags:["Enoden"]},
+    {id:"bridge", loc:"enostation", title:"เดิน Enoshima Station → เกาะ", icon:"🚶", dur:25, kind:"walk", desc:"เดินผ่าน Katase และข้าม Enoshima Benten Bridge เข้าเกาะ", tags:["เดิน","~20–25 นาที"]},
+    {id:"nakamise", loc:"nakamise", title:"Benzaiten Nakamise-dori", icon:"🦑", dur:40, kind:"activity", desc:"Street food + Bronze Torii ซื้อของที่อยากกินตอนขาขึ้น เพราะกลางคืนบางร้านอาจปิด", tags:["Enoshima","Street food"]},
+    {id:"shrine", loc:"shrine", title:"Enoshima Shrine", icon:"⛩️", dur:40, kind:"activity", desc:"Zuishinmon → Hetsumiya แล้วค่อยขึ้นด้านบน ใช้ Escar ได้ถ้าอยากเก็บแรง", tags:["Enoshima","ศาลเจ้า"], protect:true},
+    {id:"garden", loc:"garden", title:"Samuel Cocking Garden + Sea Candle", icon:"🗼", dur:45, kind:"activity", desc:"เดินสวน ขึ้น viewpoint/Sea Candle และเตรียมหาจุดดูพระอาทิตย์ตก", tags:["ยอดเกาะ","ห้ามมาช้า"], protect:true},
+    {id:"sunset", loc:"garden", title:"Golden hour + Sunset", icon:"🌅", dur:55, kind:"fixed", desc:"ช่วงนี้ถูกล็อกไว้ 17:15–18:10 ไม่ควรเอากิจกรรมอื่นมาเบียด", tags:["LOCKED","Sunset"], protect:true},
+    {id:"lantern-garden", loc:"garden", title:"Lantern @ Samuel Cocking Garden", icon:"🏮", dur:30, kind:"fixed", desc:"หลัง 18:00 เดินชมโคมไฟบริเวณสวนและ Sea Candle ก่อนเริ่มลง", tags:["江の島灯籠","18:00+"], protect:true},
+    {id:"lantern-down", loc:"shrine", title:"เดินลงผ่าน Enoshima Shrine", icon:"🏮", dur:50, kind:"fixed", desc:"ลงผ่าน Nakatsumiya → Hetsumiya → Zuishinmon / 光の絵巻 โดยไม่ย้อนขึ้นเกาะ", tags:["Lantern route","ลงทางเดียว"], protect:true},
+    {id:"exit", loc:"nakamise", title:"Nakamise → ออกจากเกาะ", icon:"🌉", dur:25, kind:"fixed", desc:"เดินข้ามสะพานกลับไป Enoshima Station", tags:["เดินกลับ"]},
+    {id:"return", loc:"fujisawa", title:"Enoshima → Fujisawa → Yokohama", icon:"🚆", dur:55, kind:"fixed", desc:"Enoden ไป Fujisawa → เปลี่ยน JR Tokaido Line ไป Yokohama", tags:["Enoden","JR","กลับ Yokohama"]}
+  ];
+
+  const compressRules = [
+    {id:"inamura", min:0, label:"Inamuragasaki", note:"30 → 15 นาที → ตัดได้", maxSave:30},
+    {id:"slam", min:15, label:"Slam Dunk Crossing", note:"30 → 20 → 15 นาที", maxSave:15},
+    {id:"komachi", min:15, label:"Komachi-dori", note:"40 → 25 → 15 นาที", maxSave:25},
+    {id:"lunch", min:20, label:"Lunch", note:"40 → 30 → 20 นาที", maxSave:20},
+    {id:"hachimangu", min:25, label:"Tsurugaoka Hachimangu", note:"50 → 35 → 25 นาที", maxSave:25},
+    {id:"hasedera", min:35, label:"Hasedera", note:"50 → 40 → 35 นาที", maxSave:15},
+    {id:"kotoku", min:20, label:"Great Buddha", note:"35 → 25 → 20 นาที", maxSave:15},
+    {id:"nakamise", min:30, label:"Nakamise", note:"40 → 30 นาที", maxSave:10},
+    {id:"shrine", min:30, label:"Enoshima Shrine", note:"40 → 30 นาที", maxSave:10}
+  ];
+
+  const segmentDefs = [
+    ["yokohama","kamakura","JR","JR Yokosuka Line","~25–30 นาที","transit"],
+    ["kamakura","hasedera","Enoden","Kamakura → Hase","~5 นาที + รอรถ","transit"],
+    ["hasedera","kotoku","Walk","Hasedera → Kotoku-in","~10 นาที","walk"],
+    ["kotoku","inamura","Enoden","Hase → Inamuragasaki","~2 สถานี","transit"],
+    ["inamura","slam","Enoden","Inamuragasaki → Kamakurakokomae","~2 สถานี","transit"],
+    ["slam","enostation","Enoden","Kamakurakokomae → Enoshima","~10 นาที","transit"],
+    ["enostation","nakamise","Walk","Enoshima Station → Island","~20–25 นาที","walk"],
+    ["nakamise","garden","Walk / Escar","ขึ้น Enoshima","Escar ช่วยเก็บแรง","walk"],
+    ["garden","nakamise","Walk","ลงเกาะหลังงานไฟ","ลงทางเดียว ไม่ย้อน","walk"],
+    ["enostation","fujisawa","Enoden","Enoshima → Fujisawa","ต่อ JR ที่ Fujisawa","transit"],
+    ["fujisawa","yokohama","JR","JR Tokaido Line","กลับ Yokohama","transit"]
+  ];
+
+  const routeStops = ["yokohama","kamakura","hachimangu","hasedera","kotoku","inamura","slam","enostation","nakamise","shrine","garden","shrine","nakamise","enostation","fujisawa","yokohama"];
+
+  const doneKey = "kamakura-enoshima-done-v1";
+  let done = new Set(JSON.parse(localStorage.getItem(doneKey) || "[]"));
+  let currentDelay = Number(localStorage.getItem("kamakura-enoshima-delay-v1") || 0);
+
+  function minToTime(min){
+    min = ((min % 1440) + 1440) % 1440;
+    const h = Math.floor(min/60), m=min%60;
+    return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0");
+  }
+
+  function makePlan(delay){
+    const durs = Object.fromEntries(blocks.map(b=>[b.id,b.dur]));
+    let need = delay;
+    const cuts = {};
+    for(const rule of compressRules){
+      if(need <= 0) break;
+      const original = durs[rule.id];
+      const possible = Math.max(0, original - rule.min);
+      const save = Math.min(need, possible);
+      durs[rule.id] = original - save;
+      cuts[rule.id] = save;
+      need -= save;
+    }
+
+    const startBase = 8*60+15+delay;
+    let cursor = startBase;
+    const plan = [];
+    let fixedAnchorUsed = false;
+
+    for(const block of blocks){
+      let start = cursor;
+      let duration = durs[block.id];
+      if(block.id === "sunset"){
+        const anchor = 17*60+15;
+        if(cursor < anchor){ start = anchor; cursor = anchor; }
+        fixedAnchorUsed = true;
+      }
+      const end = start + duration;
+      plan.push({...block,start,end,duration,cut:cuts[block.id]||0});
+      cursor = end;
+    }
+
+    const sunset = plan.find(x=>x.id==="sunset");
+    const latenessAtSunset = Math.max(0, sunset.start - (17*60+15));
+    const totalSaved = delay - need;
+    return {plan,cuts,remaining:need,totalSaved,latenessAtSunset,fixedAnchorUsed};
+  }
+
+  function mapsDir(a,b,mode){
+    const A=locations[a], B=locations[b];
+    const tm = mode==="walk" ? "walking" : "transit";
+    return `https://www.google.com/maps/dir/?api=1&origin=${A.lat},${A.lng}&destination=${B.lat},${B.lng}&travelmode=${tm}`;
+  }
+
+  function locMaps(loc){
+    const L=locations[loc];
+    return `https://www.google.com/maps/search/?api=1&query=${L.lat},${L.lng}`;
+  }
+
+  function getNextLoc(index){
+    for(let i=index+1;i<blocks.length;i++){
+      if(blocks[i].loc !== blocks[index].loc) return blocks[i].loc;
+    }
+    return null;
+  }
+
+  function renderRescue(result){
+    const el = root.getElementById("rescueList");
+    el.innerHTML = compressRules.map((r,i)=>{
+      const save = result.cuts[r.id] || 0;
+      return `<div class="rescue-item ${save>0?'active':''}">
+        <div class="num">${i+1}</div>
+        <div><b>${r.label}</b><br><span>${r.note}</span></div>
+        <div class="saved">${save>0?`−${save}m`:''}</div>
+      </div>`;
+    }).join("");
+  }
+
+  function renderTimeline(result){
+    const list = root.getElementById("timelineList");
+    list.innerHTML = result.plan.map((b,i)=>{
+      const isDone = done.has(b.id);
+      const cutLabel = b.cut ? (b.duration===0 ? "ตัดออก" : `ลด ${b.cut} นาที`) : "";
+      const nextLoc = getNextLoc(i);
+      const dirLink = nextLoc ? mapsDir(b.loc,nextLoc, (b.kind==="walk" ? "walk":"transit")) : locMaps(b.loc);
+      return `<article class="stop ${isDone?'done':''}" data-id="${b.id}">
+        <div class="time">${minToTime(b.start)}<small>${b.duration===0?'SKIP':`${b.duration} นาที`}</small></div>
+        <div class="stepdot">${isDone?'✓':i+1}</div>
+        <div class="stop-main">
+          <div class="stop-top">
+            <h3>${b.icon} ${b.title}</h3>
+          </div>
+          <div class="tags">
+            ${b.tags.map(t=>`<span class="tag ${b.protect?'protect':''}">${t}</span>`).join("")}
+            ${cutLabel?`<span class="tag cut">${cutLabel}</span>`:""}
+          </div>
+          <p class="desc">${b.duration===0?'<b style="color:var(--warn)">ข้ามจุดนี้ในโหมดปัจจุบัน</b> — ':''}${b.desc}</p>
+          <div class="action-row">
+            <button class="done-btn" data-done="${b.id}">${isDone?'✓ ทำแล้ว':'ทำเครื่องหมายว่าทำแล้ว'}</button>
+            <a class="mini" href="${dirLink}" target="_blank" rel="noopener">↗ Directions</a>
+          </div>
+        </div>
+      </article>`;
+    }).join("");
+    list.querySelectorAll("[data-done]").forEach(btn=>btn.addEventListener("click",()=>{
+      const id=btn.dataset.done;
+      done.has(id)?done.delete(id):done.add(id);
+      localStorage.setItem(doneKey,JSON.stringify([...done]));
+      update();
+    }));
+  }
+
+  function renderSegments(){
+    const icons={JR:"🚆",Enoden:"🚃",Walk:"🚶","Walk / Escar":"🛗"};
+    root.getElementById("segmentsList").innerHTML = segmentDefs.map(s=>{
+      const [a,b,type,label,time,mode]=s;
+      return `<div class="segment">
+        <div class="segicon">${icons[type]||"➜"}</div>
+        <div>
+          <b>${label}</b>
+          <p>${locations[a].name} → ${locations[b].name}</p>
+          <div class="segmeta"><span>${type}</span><span>${time}</span>
+          <a class="mini" style="padding:3px 6px" target="_blank" rel="noopener" href="${mapsDir(a,b,mode)}">Directions ↗</a></div>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  function status(result, delay){
+    const box=root.getElementById("statusBox"), title=root.getElementById("statusTitle"), text=root.getElementById("statusText");
+    const summary=root.getElementById("planSummary");
+    if(delay===0){
+      box.className="status good"; title.textContent="แผนเต็ม — ไม่ต้องตัดอะไร";
+      text.textContent="ขึ้นถึง Samuel Cocking Garden ประมาณ 16:30 และเริ่มหาจุด Sunset 17:15";
+      summary.textContent="Full plan · ETA sunset zone 17:15";
+    }else if(result.remaining===0){
+      box.className=delay<=60?"status good":"status warn";
+      title.textContent=`ช้า ${delay} นาที แต่ยังรักษา Sunset ได้`;
+      text.textContent=`ระบบคืนเวลาได้ ${result.totalSaved} นาที โดยลดจุด Buffer ตามลำดับ ช่วง 17:15–20:30 ยังเหมือนเดิม`;
+      summary.textContent=`Rescue plan · คืนเวลา ${result.totalSaved} นาที · Sunset ยัง 17:15`;
+    }else{
+      box.className="status danger";
+      title.textContent=`ช้ามาก — Sunset จะเลื่อนไปประมาณ ${minToTime(17*60+15+result.remaining)}`;
+      text.textContent=`ระบบบีบกิจกรรมได้ ${result.totalSaved} นาทีแล้ว แต่ยังขาด ${result.remaining} นาที ถ้าต้องการรักษา Sunset ให้ข้าม Kamakura Old Town หรือหนึ่งในวัดแทน`;
+      summary.textContent=`Emergency · ยังช้า ${result.remaining} นาทีหลังตัด Buffer`;
+    }
+  }
+
+  function update(){
+    const delay=currentDelay;
+    root.getElementById("delaySlider").value=delay;
+    root.getElementById("delayValue").textContent=delay;
+    localStorage.setItem("kamakura-enoshima-delay-v1",String(delay));
+    const result=makePlan(delay);
+    renderRescue(result);
+    renderTimeline(result);
+    status(result,delay);
+  }
+
+  root.getElementById("delaySlider").addEventListener("input",e=>{currentDelay=Number(e.target.value);update()});
+  root.getElementById("preset30").addEventListener("click",()=>{currentDelay=30;update()});
+  root.getElementById("preset60").addEventListener("click",()=>{currentDelay=60;update()});
+  root.getElementById("preset90").addEventListener("click",()=>{currentDelay=90;update()});
+  root.getElementById("resetBtn").addEventListener("click",()=>{currentDelay=0;done.clear();localStorage.removeItem(doneKey);update()});
+
+  renderSegments();
+  update();
+})();
+</script>
+</body>
+</html>
